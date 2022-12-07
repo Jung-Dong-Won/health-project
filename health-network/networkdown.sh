@@ -1,6 +1,6 @@
 #!/bin/bash
 
-COMPOSE_FILE_CA=docker/docker-compose-ca.yaml
+COMPOSE_FILES_CA=docker/docker-compose-ca.yaml
 COMPOSE_FILES=docker/docker-compose-net.yaml
 #COMPOSE_FILES_COUCH=docker/docker-compose-couch.yaml
 

@@ -28,44 +28,38 @@ if [ -d "organizations/peerOrganizations" ]; then
     rm -Rf organizations/peerOrganizations && rm -Rf organizations/ordererOrganizations
 fi
 
-# Create crypto material using cryptogen
+# # Create crypto material using cryptogen
 
-infoln "Generating certificates using cryptogen tool"
+# infoln "Generating certificates using cryptogen tool"
 
-subinfoln "Creating Org1 Identities"
+# subinfoln "Creating Org1 Identities"
 
-set -x
-cryptogen generate --config=./config/crypto-config-org1.yaml --output="organizations"
-res=$?
-{ set +x; } 2>/dev/null
+# set -x
+# cryptogen generate --config=./config/crypto-config-org1.yaml --output="organizations"
+# res=$?
+# { set +x; } 2>/dev/null
 
-subinfoln "Creating Org2 Identities"
+# subinfoln "Creating Org2 Identities"
 
-set -x
-cryptogen generate --config=./config/crypto-config-org2.yaml --output="organizations"
-res=$?
-{ set +x; } 2>/dev/null
+# set -x
+# cryptogen generate --config=./config/crypto-config-org2.yaml --output="organizations"
+# res=$?
+# { set +x; } 2>/dev/null
 
-subinfoln "Creating Org3 Identities"
+# subinfoln "Creating Org3 Identities"
 
-set -x
-cryptogen generate --config=./config/crypto-config-org3.yaml --output="organizations"
-res=$?
-{ set +x; } 2>/dev/null
+# set -x
+# cryptogen generate --config=./config/crypto-config-org3.yaml --output="organizations"
+# res=$?
+# { set +x; } 2>/dev/null
 
-subinfoln "Creating Orderer Org Identities"
+# subinfoln "Creating Orderer Org Identities"
 
-set -x
-cryptogen generate --config=./config/crypto-config-orderer.yaml --output="organizations"
-res=$?
-{ set +x; } 2>/dev/null
+# set -x
+# cryptogen generate --config=./config/crypto-config-orderer.yaml --output="organizations"
+# res=$?
+# { set +x; } 2>/dev/null
 
-
-# Generate orderer system channel genesis block.
-infoln "------------- Generating Orderer Genesis block"
-set -x
-configtxgen -profile ThreeOrgsOrdererGenesis -channelID system-channel -outputBlock ./system-genesis-block/genesis.block
-{ set +x; } 2>/dev/null
 
 # Bring up the peer and orderer nodes using docker compose.
 infoln "------------- Bring up the peer and orderer nodes using docker compose"
@@ -74,7 +68,8 @@ COMPOSE_FILES=docker/docker-compose-net.yaml
 # IMAGE_TAG=latest docker-compose -f $COMPOSE_FILES up -d 2>&1
 #COMPOSE_FILES_COUCH=docker/docker-compose-couch.yaml
 COMPOSE_FILES_CA=docker/docker-compose-ca.yaml
-IMAGE_TAG=latest docker-compose -f $COMPOSE_FILES -f $COMPOSE_FILES_CA up -d 2>&1
+#IMAGE_TAG=latest docker-compose -f $COMPOSE_FILES -f $COMPOSE_FILES_CA up -d 2>&1
+IMAGE_TAG=latest docker-compose -f $COMPOSE_FILES_CA up -d 2>&1
 
 docker ps -a
 
@@ -92,3 +87,11 @@ createOrg3
 
 subinfoln "Create Orderer crypto material"
 createOrderer
+
+# Generate orderer system channel genesis block.
+infoln "------------- Generating Orderer Genesis block"
+set -x
+configtxgen -profile ThreeOrgsOrdererGenesis -channelID system-channel -outputBlock ./system-genesis-block/genesis.block
+{ set +x; } 2>/dev/null
+
+IMAGE_TAG=latest docker-compose -f $COMPOSE_FILES up -d 2>&1

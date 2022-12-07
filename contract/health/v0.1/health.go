@@ -10,9 +10,9 @@ import (
 	"fmt"
 	//"strconv"
 	"time"
-	"log"
+	//"log"
 
-	"github.com/golang/protobuf/ptypes"
+	//"github.com/golang/protobuf/ptypes"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
 
@@ -33,14 +33,6 @@ type Health struct {
 	DateOfDiagnosis  string `json:"dateofdiganosis"`
 }
 
-// HistoryQueryResult structure used for returning result of history query
-type HistoryQueryResult struct {
-	Record    *Health    `json:"record"`
-	TxId     string    `json:"txId"`
-	Timestamp time.Time `json:"timestamp"`
-	IsDelete  bool      `json:"isDelete"`
-}
-
 // 4.1 health_register (number, name, dateofbirth, kcd, doctor, dateofdiagnosis)
 func (s *SmartContract) Health_register(ctx contractapi.TransactionContextInterface, number string, name string, dateofbirth string, kcd string, doctor string, dateofdiagnosis string) error {
 	health := Health{
@@ -57,7 +49,7 @@ func (s *SmartContract) Health_register(ctx contractapi.TransactionContextInterf
 	return ctx.GetStub().PutState(number, healthAsBytes)
 }
 
-// health_query (number)
+// 4.2 health_query (number)
 func(s *SmartContract) Health_query(ctx contractapi.TransactionContextInterface, number string) (*Health, error) {
 	healthAsBytes, err := ctx.GetStub().GetState(number) // state -> JSON format
 
@@ -76,7 +68,15 @@ func(s *SmartContract) Health_query(ctx contractapi.TransactionContextInterface,
 	return health, nil
 }
 
-// main
+// HistoryQueryResult structure used for returning result of history query
+type HistoryQueryResult struct {
+	Record    *Health    `json:"record"`
+	TxId     string    `json:"txId"`
+	Timestamp time.Time `json:"timestamp"`
+	IsDelete  bool      `json:"isDelete"`
+}
+
+// 5. main
 func main() {
 
 	chaincode, err := contractapi.NewChaincode(new(SmartContract))

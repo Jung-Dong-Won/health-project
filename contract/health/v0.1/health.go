@@ -29,22 +29,9 @@ type Health struct {
 	Name  string `json:"name"`
 	DateOfBirth string `json:"dateofbirth"`
 	KCD  string `json:"KCD"`
-	Diagnosis  string `json:"diagnosis"`
 	Doctor  string `json:"doctor"`
-	Hospital  string `json:"Hospital"`
-	DateOfVisit  string `json:"dateofvisit"`
-	Status  string `json:"status"` // registered, 
+	DateOfDiagnosis  string `json:"dateofdiganosis"`
 }
-
-/* ex
-type Svc struct {
-	Serial string
-	SvcID stirng
-	SvcRequestInfo string
-	SvcInvoice string
-	SvcCompleteInfo string
-}
-*/
 
 // HistoryQueryResult structure used for returning result of history query
 type HistoryQueryResult struct {
@@ -54,12 +41,15 @@ type HistoryQueryResult struct {
 	IsDelete  bool      `json:"isDelete"`
 }
 
-// 4.1 health_register (serial, name, )
-func (s *SmartContract) Health_register(ctx contractapi.TransactionContextInterface, number string, name string) error {
+// 4.1 health_register (number, name, dateofbirth, kcd, doctor, dateofdiagnosis)
+func (s *SmartContract) Health_register(ctx contractapi.TransactionContextInterface, number string, name string, dateofbirth string, kcd string, doctor string, dateofdiagnosis string) error {
 	health := Health{
 		Number: number,
 		Name: name,
-		Status: "registered",
+		DateOfBirth: dateofbirth,
+		KCD: kcd,
+		Doctor: doctor,
+		DateofDiagnosis: dateofdiagnosis,
 	}
 
 	healthAsBytes, _ := json.Marshal(health)
@@ -86,85 +76,7 @@ func(s *SmartContract) Health_query(ctx contractapi.TransactionContextInterface,
 	return health, nil
 }
 
-// ChangeDoctor
-func (s *SmartContract) ChangeDoctor (ctx contractapi.TransactionContextInterface, number string, newDoctor string) error {
-
-	health, err := s.Health_query(ctx, number)
-
-	if err != nil {
-		return err
-	}
-	// 검증 status == registered, paid
-	// 예시
-	/*
-	if goods.Status == "registered" || goods.Status == "paid" {
-		goods.Status = "requested"
-
-		// (TODO) SVC Info State Generation
-
-		goodsAsBytes, _ := json.Marshal(goods)
-		return ctx.GetStubd().PutState(serial, goodsAsBytes)
-	} else {
-		return fmt.Errorf("Goods is not in registered or paid: %s", serial)
-	}
-	*/
-
-
-	// health.Doctor = newDoctor
-	health.Status = "requested"
-	healthAsBytes, _ := json.Marshal(health) // 직렬화 (구조체 -> JSON 포멧의 Byte[])
-
-	return ctx.GetStub().PutState(number, healthAsBytes)
-
-}
-
-
-// health_history (serial)
-func (t *SmartContract) Health_history(ctx contractapi.TransactionContextInterface, number string) ([]HistoryQueryResult, error) {
-	log.Printf("health_history: ID %v", number) // 체인코드 컨테이너 -> docker logs dev-asset1...
-
-	resultsIterator, err := ctx.GetStub().GetHistoryForKey(number)
-	if err != nil {
-		return nil, err
-	}
-	defer resultsIterator.Close()
-
-	var records []HistoryQueryResult
-	for resultsIterator.HasNext() {
-		response, err := resultsIterator.Next()
-		if err != nil {
-			return nil, err
-		}
-
-		var health Health
-		if len(response.Value) > 0 {
-			err = json.Unmarshal(response.Value, &health)
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			health = Health{
-				Number: number,
-			}
-		}
-
-		timestamp, err := ptypes.Timestamp(response.Timestamp)
-		if err != nil {
-			return nil, err
-		}
-		
-		record := HistoryQueryResult{
-			TxId:     response.TxId,
-			Timestamp: timestamp,
-			Record:    &health,
-			IsDelete:  response.IsDelete,
-		}
-		records = append(records, record)
-	}
-	return records, nil
-}
-
-// 5. main
+// main
 func main() {
 
 	chaincode, err := contractapi.NewChaincode(new(SmartContract))
@@ -178,6 +90,126 @@ func main() {
 		fmt.Printf("Error starting health chaincode: %s", err.Error())
 	}
 }
+
+/* ex
+type Svc struct {
+	Serial string
+	SvcID stirng
+	SvcRequestInfo string
+	SvcInvoice string
+	SvcCompleteInfo string
+}
+*/
+
+// // QueryAllHealth
+// func (s *SmartContract) QueryAllHealth(ctx contractapi.TransactionContextInterface) ([]QueryResult, error) {
+// 	startKey := ""
+// 	endKey := ""
+
+// 	resultsIterator, err := ctx.GetStub().GetStateByRange(startKey, endKey)
+
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	defer resultsIterator.Close()
+
+// 	results := []QueryResult{}
+
+// 	for resultsIterator.HasNext() {
+// 		queryResponse, err := resultsIterator.Next()
+
+// 		if err != nil {
+// 			return nil, err
+// 		}
+
+// 		car := new(Car)
+// 		_ = json.Unmarshal(queryResponse.Value, car)
+
+// 		queryResult := QueryResult{Key: queryResponse.Key, Record: car}
+// 		results = append(results, queryResult)
+// 	}
+
+// 	return results, nil
+// }
+
+
+// // ChangeDoctor
+// func (s *SmartContract) ChangeDoctor(ctx contractapi.TransactionContextInterface, number string, newDoctor string) error {
+
+// 	health, err := s.Health_query(ctx, number)
+
+// 	if err != nil {
+// 		return err
+// 	}
+// 	// 검증 status == registered, paid
+// 	// 예시
+// 	///*
+// 	//if goods.Status == "registered" || goods.Status == "paid" {
+// 	//	goods.Status = "requested"
+//     //
+// 	//	// (TODO) SVC Info State Generation
+//     //
+// 	//	goodsAsBytes, _ := json.Marshal(goods)
+// 	//	return ctx.GetStubd().PutState(serial, goodsAsBytes)
+// 	//} else {
+// 	//	return fmt.Errorf("Goods is not in registered or paid: %s", serial)
+// 	//}
+// 	//*/
+
+
+// 	// health.Doctor = newDoctor
+// 	health.Status = "requested"
+// 	healthAsBytes, _ := json.Marshal(health) // 직렬화 (구조체 -> JSON 포멧의 Byte[])
+
+// 	return ctx.GetStub().PutState(number, healthAsBytes)
+
+// }
+
+
+// // health_history (serial)
+// func (t *SmartContract) Health_history(ctx contractapi.TransactionContextInterface, number string) ([]HistoryQueryResult, error) {
+// 	log.Printf("health_history: ID %v", number) // 체인코드 컨테이너 -> docker logs dev-asset1...
+
+// 	resultsIterator, err := ctx.GetStub().GetHistoryForKey(number)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	defer resultsIterator.Close()
+
+// 	var records []HistoryQueryResult
+// 	for resultsIterator.HasNext() {
+// 		response, err := resultsIterator.Next()
+// 		if err != nil {
+// 			return nil, err
+// 		}
+
+// 		var health Health
+// 		if len(response.Value) > 0 {
+// 			err = json.Unmarshal(response.Value, &health)
+// 			if err != nil {
+// 				return nil, err
+// 			}
+// 		} else {
+// 			health = Health{
+// 				Number: number,
+// 			}
+// 		}
+
+// 		timestamp, err := ptypes.Timestamp(response.Timestamp)
+// 		if err != nil {
+// 			return nil, err
+// 		}
+		
+// 		record := HistoryQueryResult{
+// 			TxId:     response.TxId,
+// 			Timestamp: timestamp,
+// 			Record:    &health,
+// 			IsDelete:  response.IsDelete,
+// 		}
+// 		records = append(records, record)
+// 	}
+// 	return records, nil
+// }
 
 
 /*

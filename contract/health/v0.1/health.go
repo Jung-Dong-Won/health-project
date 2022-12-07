@@ -41,7 +41,7 @@ func (s *SmartContract) Health_register(ctx contractapi.TransactionContextInterf
 		DateOfBirth: dateofbirth,
 		KCD: kcd,
 		Doctor: doctor,
-		DateofDiagnosis: dateofdiagnosis,
+		DateOfDiagnosis: dateofdiagnosis,
 	}
 
 	healthAsBytes, _ := json.Marshal(health)

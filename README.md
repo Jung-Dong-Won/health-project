@@ -1,5 +1,5 @@
 # ulsan-project
-2022 울산 블록체인교육 마지막 기수 미니프로젝트
+2022 울산 블록체인 교육 마지막 기수 미니프로젝트
 
 # 선행조건
 hyperledger fabric 2.2 LTS 설치
@@ -18,7 +18,7 @@ jq 설치
 `docker volume prune`
 
 
-`cd 프로젝트경로/ulsan-network`
+`cd 프로젝트경로/health-network`
 
 `./startnetwork.sh`
 
@@ -63,7 +63,7 @@ node server.js
 ### 지갑 폴더 지우기
 rm -rf wallet
 ### connection-org1.json 복사하기
-cp 프로젝트경로/ulsan-project/organizations/peerOrganization/org1.example.com/connection-org1.json ./
+cp 프로젝트경로/health-project/organizations/peerOrganization/org1.example.com/connection-org1.json ./
 
 localhost:3000 접속
 랜딩 페이지 접속: localhost:3000/landing.html 접속

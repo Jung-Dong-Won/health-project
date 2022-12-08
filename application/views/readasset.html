@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Read Your Health</title>
+
+    <!-- bootstrap 라이브러리 추가-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+
+    <!--  jquery 라이브러리 추가-->
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <br>
+        <h1>진료기록 조회페이지</h1>
+        <p>진료기록 조회에 필요한 정보를 입력하시오.</p>
+        <br>
+
+        <!--  id string, color string, size int, owner string, appraisedValue int        -->
+
+        
+        <label class="form-label">인증서이름</label><br> <!-- 실제는 앞에 로그인을 해서 들어오기 때문에 필요없는 부분 -->
+        <input id="cert" class="form-control" type="text"><br>
+
+        <label class="form-label">환자번호</label><br>
+        <input id="id" class="form-control" type="text"><br>
+
+        <button id="btn-read" class="btn btn-primary">진료기록 조회</button>
+        <!-- <button id="btn-readall" class="btn btn-primary">모든 자산조회</button> -->
+            <!--
+                <input type="submit" value="자산조회" class="btn btn-primary">
+            -->            
+        
+    </div>
+    <div class="container" id="result">
+        <table class="table table-striped">
+            <tbody id="tresult">
+                
+
+            </tbody>
+        </table>
+    </div>
+    <div class="container" id = "div-delete"></div>
+</body>
+<script>
+    //$("#btn-read").empty()
+    $("#btn-read").click(()=>{
+        const cert = $("#cert").val()
+        const id = $("#id").val()
+        console.log(cert,id)
+
+        $.get("/health", {cert, id}, (data, status)=>{
+            console.log(data)            
+            //const res = JSON.stringify(data.msg)
+            //console.log(res)
+            //const obj = JSON.parse(res)
+            //console.log(obj.ID)
+            $("#result").empty()
+            $("#result").append("<br>")
+            $("#result").append("<p> 환자번호: " + data.msg.number + "</p>")
+            $("#result").append("<p> 환자성명: " + data.msg.name + "</p>")
+            $("#result").append("<p> 생년월일: " + data.msg.dateofbirth + "</p>")
+            $("#result").append("<p> 질병코드: " + data.msg.KCD + "</p>")
+            $("#result").append("<p> 담당의료진: " + data.msg.doctor + "</p>")
+            $("#result").append("<p> 진료일자: " + data.msg.dateofdiganosis + "</p>")
+            //$("#result").append(`<button id="btn-delete" class="btn btn-primary">자산삭제</button>`)
+            $("#div-delete").empty()            
+
+        })
+    })
+
+    /*
+    $("#btn-readall").click(()=>{
+        console.log("in btn-readall")
+        const cert = $("#cert").val()
+        $.get("/assets",{cert},(data,status)=>{
+            console.log(data)
+
+            if (data.result=="failed"){
+                $("#alt-result").attr("class", "alert alert-danger")
+                $("#alt-result").append(`<strong>실패!</strong> ${data.msg}`)
+                $("#alt-result").fadeIn()
+                $("#alt-result").fadeOut(4000)
+
+            } else {
+                $("#tresult").empty()
+                $("#tresult").append(`<tr><th>ID</th><th>색상</th><th>크기</th><th>소유주</th><th>값</th></tr>`)
+
+                for(var i=0; i<data.msg.length; i++){
+                $("#tresult").append(`<tr>`)
+                $("#tresult").append(`<td>"${data.msg[i].ID}"</td>`)
+                $("#tresult").append(`<td>"${data.msg[i].color}"</td>`)
+                $("#tresult").append(`<td>${data.msg[i].size}</td>`)
+                $("#tresult").append(`<td>"${data.msg[i].owner}"</td>`)
+                $("#tresult").append(`<td>${data.msg[i].appraisedValue}</td>`)
+                $("#tresult").append(`</tr>`)
+                }
+
+            }
+        })
+    })
+    */
+</script>
+</html>

@@ -10,9 +10,9 @@ import (
 	"fmt"
 	//"strconv"
 	"time"
-	//"log"
+	"log"
 
-	//"github.com/golang/protobuf/ptypes"
+	"github.com/golang/protobuf/ptypes"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
 
@@ -75,6 +75,52 @@ type HistoryQueryResult struct {
 	Timestamp time.Time `json:"timestamp"`
 	IsDelete  bool      `json:"isDelete"`
 }
+
+// health_history (number)
+func (t *SmartContract) Health_history(ctx contractapi.TransactionContextInterface, number string) ([]HistoryQueryResult, error) {
+	log.Printf("health_history: number %v", number) // 체인코드 컨테이너 -> docker logs dev-asset1...
+
+	resultsIterator, err := ctx.GetStub().GetHistoryForKey(number)
+	if err != nil {
+		return nil, err
+	}
+	defer resultsIterator.Close()
+
+	var records []HistoryQueryResult
+	for resultsIterator.HasNext() {
+		response, err := resultsIterator.Next()
+		if err != nil {
+			return nil, err
+		}
+
+		var health Health
+		if len(response.Value) > 0 {
+			err = json.Unmarshal(response.Value, &health)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			health = Health{
+				Number: number,
+			}
+		}
+
+		timestamp, err := ptypes.Timestamp(response.Timestamp)
+		if err != nil {
+			return nil, err
+		}
+		
+		record := HistoryQueryResult{
+			TxId:     response.TxId,
+			Timestamp: timestamp,
+			Record:    &health,
+			IsDelete:  response.IsDelete,
+		}
+		records = append(records, record)
+	}
+	return records, nil
+}
+
 
 // 5. main
 func main() {
@@ -166,50 +212,7 @@ type Svc struct {
 // }
 
 
-// // health_history (serial)
-// func (t *SmartContract) Health_history(ctx contractapi.TransactionContextInterface, number string) ([]HistoryQueryResult, error) {
-// 	log.Printf("health_history: ID %v", number) // 체인코드 컨테이너 -> docker logs dev-asset1...
 
-// 	resultsIterator, err := ctx.GetStub().GetHistoryForKey(number)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	defer resultsIterator.Close()
-
-// 	var records []HistoryQueryResult
-// 	for resultsIterator.HasNext() {
-// 		response, err := resultsIterator.Next()
-// 		if err != nil {
-// 			return nil, err
-// 		}
-
-// 		var health Health
-// 		if len(response.Value) > 0 {
-// 			err = json.Unmarshal(response.Value, &health)
-// 			if err != nil {
-// 				return nil, err
-// 			}
-// 		} else {
-// 			health = Health{
-// 				Number: number,
-// 			}
-// 		}
-
-// 		timestamp, err := ptypes.Timestamp(response.Timestamp)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-		
-// 		record := HistoryQueryResult{
-// 			TxId:     response.TxId,
-// 			Timestamp: timestamp,
-// 			Record:    &health,
-// 			IsDelete:  response.IsDelete,
-// 		}
-// 		records = append(records, record)
-// 	}
-// 	return records, nil
-// }
 
 
 /*
